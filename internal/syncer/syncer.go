@@ -4,6 +4,7 @@ package syncer
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"time"
 
 	md "github.com/JohannesKaufmann/html-to-markdown"
@@ -12,6 +13,7 @@ import (
 	"github.com/isg/hrb/internal/article"
 	"github.com/isg/hrb/internal/cache"
 	"github.com/isg/hrb/internal/config"
+	"github.com/isg/hrb/internal/errlog"
 	"github.com/isg/hrb/internal/feed"
 	"github.com/isg/hrb/internal/meta"
 	"github.com/isg/hrb/internal/vault"
@@ -38,8 +40,11 @@ type Result struct {
 }
 
 func Run(ctx context.Context, opts Options) (*Result, error) {
+	elog := errlog.New(filepath.Join(opts.Vault.MetaDir(), "err.txt"))
+
 	c, err := cache.Load(opts.Vault.CachePath())
 	if err != nil {
+		elog.Write("cache.load", err)
 		return nil, fmt.Errorf("load cache: %w", err)
 	}
 
@@ -51,11 +56,12 @@ func Run(ctx context.Context, opts Options) (*Result, error) {
 	conv := md.NewConverter("", true, nil)
 	result := &Result{Feeds: make([]FeedResult, 0, len(feeds))}
 	for _, f := range feeds {
-		fr := syncFeed(ctx, opts, f, c, conv)
+		fr := syncFeed(ctx, opts, f, c, conv, elog)
 		result.Feeds = append(result.Feeds, fr)
 	}
 
 	if err := c.Save(); err != nil {
+		elog.Write("cache.save", err)
 		return result, fmt.Errorf("save cache: %w", err)
 	}
 	return result, nil
@@ -81,8 +87,10 @@ func syncFeed(
 	f config.Feed,
 	c *cache.Cache,
 	conv *md.Converter,
+	elog *errlog.Log,
 ) FeedResult {
 	fr := FeedResult{Name: f.Name, URL: f.URL}
+	tag := "feed:" + f.Name
 
 	entry := c.Get(f.Name)
 	res, err := feed.Fetch(ctx, f.URL, feed.Options{
@@ -91,6 +99,7 @@ func syncFeed(
 		LastModified: entry.LastModified,
 	})
 	if err != nil {
+		elog.Write(tag+":fetch", err)
 		fr.Err = err
 		return fr
 	}
@@ -103,6 +112,7 @@ func syncFeed(
 		a := itemToArticle(item, f.Name, conv)
 		written, path, err := article.Write(opts.Vault.FeedsDir(), a)
 		if err != nil {
+			elog.Write(tag+":write", err)
 			fr.Err = err
 			return fr
 		}
@@ -112,6 +122,7 @@ func syncFeed(
 			fr.Existing++
 		}
 		if _, err := meta.WriteIfAbsent(path); err != nil {
+			elog.Write(tag+":meta", err)
 			fr.Err = err
 			return fr
 		}

@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Kunde21/markdownfmt/v3"
 	"gopkg.in/yaml.v3"
 )
 
@@ -23,7 +24,6 @@ type Article struct {
 	FeedName  string
 	GUID      string
 	Body      string
-	WrapWidth int // 0 disables paragraph wrapping
 }
 
 func (a *Article) Filename() string {
@@ -131,8 +131,8 @@ func render(a *Article) ([]byte, error) {
 	}
 
 	body := cleanBody(a.Body, a.Title)
-	if a.WrapWidth > 0 {
-		body = wrapMarkdown(body, a.WrapWidth)
+	if out, err := markdownfmt.Process("", []byte(body)); err == nil {
+		body = strings.TrimRight(string(out), "\n")
 	}
 
 	var b strings.Builder
