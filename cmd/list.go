@@ -87,7 +87,7 @@ func printTSV(items []listing.Item) error {
 			it.Published.Format("2006-01-02"),
 			boolBit(it.Read),
 			boolBit(it.Favorite),
-			tabSafe(it.Title),
+			tabSafe(it.Label()),
 		)
 	}
 	return nil
@@ -136,7 +136,7 @@ func printPretty(items []listing.Item) error {
 			stateChar(it.Favorite, "F"),
 			it.Published.Format("2006-01-02"),
 			feedW, feed,
-			it.Title,
+			it.Label(),
 		)
 	}
 	return nil

@@ -23,6 +23,7 @@ type Article struct {
 	FeedName  string
 	GUID      string
 	Body      string
+	WrapWidth int // 0 disables paragraph wrapping
 }
 
 func (a *Article) Filename() string {
@@ -130,6 +131,9 @@ func render(a *Article) ([]byte, error) {
 	}
 
 	body := cleanBody(a.Body, a.Title)
+	if a.WrapWidth > 0 {
+		body = wrapMarkdown(body, a.WrapWidth)
+	}
 
 	var b strings.Builder
 	b.WriteString("---\n")

@@ -16,6 +16,7 @@ type Meta struct {
 	ReadAt   *time.Time `toml:"read_at,omitempty"`
 	Favorite bool       `toml:"favorite"`
 	Tags     []string   `toml:"tags,omitempty"`
+	Alias    string     `toml:"alias,omitempty"`
 }
 
 func Path(articlePath string) string {
@@ -112,6 +113,20 @@ func MarkUnread(articlePath string) error {
 	}
 	m.Read = false
 	m.ReadAt = nil
+	return Save(articlePath, m)
+}
+
+// SetAlias sets the display alias on an article (or clears it if alias
+// is empty/whitespace).
+func SetAlias(articlePath, alias string) error {
+	if err := ensureArticle(articlePath); err != nil {
+		return err
+	}
+	m, err := loadForUpdate(articlePath)
+	if err != nil {
+		return err
+	}
+	m.Alias = strings.TrimSpace(alias)
 	return Save(articlePath, m)
 }
 

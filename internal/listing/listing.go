@@ -20,6 +20,7 @@ import (
 type Item struct {
 	Path      string    `json:"path"`
 	Title     string    `json:"title"`
+	Alias     string    `json:"alias,omitempty"`
 	URL       string    `json:"url"`
 	Feed      string    `json:"feed"`
 	GUID      string    `json:"guid,omitempty"`
@@ -27,6 +28,14 @@ type Item struct {
 	Read      bool      `json:"read"`
 	Favorite  bool      `json:"favorite"`
 	Tags      []string  `json:"tags,omitempty"`
+}
+
+// Label returns the alias if set, otherwise the article title.
+func (it Item) Label() string {
+	if it.Alias != "" {
+		return it.Alias
+	}
+	return it.Title
 }
 
 type Filter struct {
@@ -78,6 +87,7 @@ func loadItem(path string) (Item, error) {
 	return Item{
 		Path:      path,
 		Title:     fm.Title,
+		Alias:     m.Alias,
 		URL:       fm.URL,
 		Feed:      fm.Feed,
 		GUID:      fm.GUID,
