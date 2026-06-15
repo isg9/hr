@@ -1,5 +1,5 @@
 // Package errlog appends timestamped error entries to a log file
-// (typically <vault>/.hrb/err.txt). Designed to be safe to call with a
+// (typically <vault>/.hr/err.txt). Designed to be safe to call with a
 // nil receiver — callers don't need to guard.
 package errlog
 

@@ -1,15 +1,15 @@
-# hrb vault config. Add or remove feeds below, then `hrb sync`.
+# hr vault config. Add or remove feeds below, then `hr sync`.
 
 [[feeds]]
 url  = "https://go.dev/blog/feed.atom"
 name = "go-blog"
 tags = ["go"]
 
-# Sort order for `hrb list` / `hrb feed`. "desc" = newest first.
+# Sort order for `hr list` / `hr feed`. "desc" = newest first.
 ordering = "desc"
 
 # Mark items read when their file is opened (requires nvim autocmd).
 autoread = false
 
 # User-Agent for HTTP requests.
-user_agent = "hrb/0.1"
+user_agent = "hr/0.1"

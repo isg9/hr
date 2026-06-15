@@ -6,14 +6,14 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/isg/hrb/internal/vault"
+	"github.com/isg/hr/internal/vault"
 )
 
 var validName = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_-]*$`)
 
 var initCmd = &cobra.Command{
 	Use:   "init <name> [dir]",
-	Short: "Initialize a new hrb vault",
+	Short: "Initialize a new hr vault",
 	Args:  cobra.RangeArgs(1, 2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
@@ -36,12 +36,12 @@ var initCmd = &cobra.Command{
 			return err
 		}
 		fmt.Printf(
-			"initialized hrb vault %q at %s\n", name, v.Root)
+			"initialized hr vault %q at %s\n", name, v.Root)
 		fmt.Printf("  config: %s\n", v.ConfigPath())
 		fmt.Printf("  feeds:  %s/\n", v.FeedsDir())
 		fmt.Println()
 		fmt.Println(
-			"Edit the config to add feeds, then run `hrb sync`.")
+			"Edit the config to add feeds, then run `hr sync`.")
 		return nil
 	},
 }

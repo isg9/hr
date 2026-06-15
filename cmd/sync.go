@@ -5,9 +5,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/isg/hrb/internal/config"
-	"github.com/isg/hrb/internal/syncer"
-	"github.com/isg/hrb/internal/vault"
+	"github.com/isg/hr/internal/config"
+	"github.com/isg/hr/internal/syncer"
+	"github.com/isg/hr/internal/vault"
 )
 
 var syncFeedFilter string
@@ -30,7 +30,7 @@ var syncCmd = &cobra.Command{
 		}
 		ua := cfg.UserAgent
 		if ua == "" {
-			ua = "hrb/0.1"
+			ua = "hr/0.1"
 		}
 
 		res, err := syncer.Run(cmd.Context(), syncer.Options{

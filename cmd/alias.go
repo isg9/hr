@@ -6,14 +6,14 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/isg/hrb/internal/meta"
+	"github.com/isg/hr/internal/meta"
 )
 
 var aliasCmd = &cobra.Command{
 	Use:   "alias <path> [name]",
 	Short: "Set or clear an article's local display alias",
 	Long: "Local display label that overrides the article's title in " +
-		"`hrb list` and the nvim panel. The alias is stored in the " +
+		"`hr list` and the nvim panel. The alias is stored in the " +
 		"article's sidecar .meta.toml. With no [name] argument, " +
 		"clears the existing alias.",
 	Args: cobra.RangeArgs(1, 2),

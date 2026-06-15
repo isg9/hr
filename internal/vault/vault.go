@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/isg/hrb/internal/rc"
+	"github.com/isg/hr/internal/rc"
 )
 
 //go:embed default.toml
@@ -20,11 +20,11 @@ type Vault struct {
 }
 
 // Resolve returns the absolute root of the active vault for operating
-// commands. Priority: explicit (flag) > $HRB_VAULT > ~/.hrbrc.
+// commands. Priority: explicit (flag) > $HR_VAULT > ~/.hrrc.
 func Resolve(explicit string) (string, error) {
 	raw := explicit
 	if raw == "" {
-		raw = os.Getenv("HRB_VAULT")
+		raw = os.Getenv("HR_VAULT")
 	}
 	if raw == "" {
 		r, err := rc.Load()
@@ -35,18 +35,18 @@ func Resolve(explicit string) (string, error) {
 	}
 	if raw == "" {
 		return "", fmt.Errorf(
-			"no vault configured (run `hrb init <name>`)")
+			"no vault configured (run `hr init <name>`)")
 	}
 	return absExpand(raw)
 }
 
 // ResolveNew returns the absolute path for a vault about to be
-// created. Priority: explicit > $HRB_VAULT > ~/blogs/<name>. Never
-// reads ~/.hrbrc.
+// created. Priority: explicit > $HR_VAULT > ~/blogs/<name>. Never
+// reads ~/.hrrc.
 func ResolveNew(explicit, name string) (string, error) {
 	raw := explicit
 	if raw == "" {
-		raw = os.Getenv("HRB_VAULT")
+		raw = os.Getenv("HR_VAULT")
 	}
 	if raw == "" {
 		raw = "~/blogs/" + name
@@ -81,7 +81,7 @@ func Open(root string) (*Vault, error) {
 	if _, err := os.Stat(v.ConfigPath()); err != nil {
 		if os.IsNotExist(err) {
 			return nil, fmt.Errorf(
-				"no hrb vault at %s (run `hrb init` first)", root)
+				"no hr vault at %s (run `hr init` first)", root)
 		}
 		return nil, err
 	}
@@ -109,13 +109,13 @@ func Init(root, name string) (*Vault, error) {
 	}
 
 	gitignore := filepath.Join(v.Root, ".gitignore")
-	err = os.WriteFile(gitignore, []byte(".hrb/\n"), 0o644)
+	err = os.WriteFile(gitignore, []byte(".hr/\n"), 0o644)
 	if err != nil {
 		return nil, fmt.Errorf("write .gitignore: %w", err)
 	}
 
 	if err := rc.Save(&rc.RC{Vault: v.Root}); err != nil {
-		return nil, fmt.Errorf("write hrbrc: %w", err)
+		return nil, fmt.Errorf("write hrrc: %w", err)
 	}
 
 	return v, nil
@@ -127,7 +127,7 @@ func buildConfig(name string) []byte {
 }
 
 func (v *Vault) ConfigPath() string {
-	return filepath.Join(v.Root, "hrb.toml")
+	return filepath.Join(v.Root, "hr.toml")
 }
 
 func (v *Vault) FeedsDir() string {
@@ -135,7 +135,7 @@ func (v *Vault) FeedsDir() string {
 }
 
 func (v *Vault) MetaDir() string {
-	return filepath.Join(v.Root, ".hrb")
+	return filepath.Join(v.Root, ".hr")
 }
 
 func (v *Vault) CachePath() string {

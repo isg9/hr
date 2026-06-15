@@ -1,4 +1,4 @@
-// Package config loads and saves the vault's hrb.toml.
+// Package config loads and saves the vault's hr.toml.
 package config
 
 import (

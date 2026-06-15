@@ -1,5 +1,5 @@
-// Package rc reads and writes ~/.hrbrc, the user's local pointer to
-// the active hrb vault.
+// Package rc reads and writes ~/.hrrc, the user's local pointer to
+// the active hr vault.
 package rc
 
 import (
@@ -20,7 +20,7 @@ func Path() (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("locate home directory: %w", err)
 	}
-	return filepath.Join(home, ".hrbrc"), nil
+	return filepath.Join(home, ".hrrc"), nil
 }
 
 func Load() (*RC, error) {

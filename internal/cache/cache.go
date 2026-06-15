@@ -1,5 +1,5 @@
 // Package cache persists per-feed sync state (ETag, Last-Modified,
-// last fetch time) to .hrb/cache.json. It is gitignored.
+// last fetch time) to .hr/cache.json. It is gitignored.
 package cache
 
 import (

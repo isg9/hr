@@ -1,7 +1,7 @@
 .PHONY: build install test tidy clean
 
 build:
-	go build -o bin/hrb .
+	go build -o bin/hr .
 
 install:
 	go install .

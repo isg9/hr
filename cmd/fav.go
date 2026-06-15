@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/isg/hrb/internal/meta"
+	"github.com/isg/hr/internal/meta"
 )
 
 var favCmd = &cobra.Command{

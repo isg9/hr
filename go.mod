@@ -1,4 +1,4 @@
-module github.com/isg/hrb
+module github.com/isg/hr
 
 go 1.25.5
 

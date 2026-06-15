@@ -1,6 +1,6 @@
 package main
 
-import "github.com/isg/hrb/cmd"
+import "github.com/isg/hr/cmd"
 
 func main() {
 	cmd.Execute()
