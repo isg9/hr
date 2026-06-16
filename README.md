@@ -17,7 +17,6 @@ hr alias <path> [name] # local display label (no [name] = clear)
 Nvim panel: `~/.dotfiles/nvim/lua/hr/init.lua`. `<leader>r` toggles a
 sidebar with its own buffer keys (`<CR>`/`o`/`r`/`u`/`f`/`a`/`R`/`s`/`q`/`?`).
 
-
 ## Vault layout
 
 ```
@@ -34,7 +33,6 @@ sidebar with its own buffer keys (`<CR>`/`o`/`r`/`u`/`f`/`a`/`R`/`s`/`q`/`?`).
 
 The `<id>` segment is the first 8 hex chars of `sha1(GUID || URL ||
 title)`, so the same item lands on the same path across machines.
-
 
 ## Storage design
 
@@ -68,7 +66,6 @@ title)`, so the same item lands on the same path across machines.
 - **No tests yet.** Filename derivation, sidecar I/O, alias toggling
   are uncovered.
 
-
 ## Formatting
 
 There's no Go library for markdown-aware hard column wrap (checked:
@@ -87,19 +84,18 @@ toolkit; `muesli/reflow` is markdown-blind). So:
 Same trade-off `nom` makes — it doesn't pre-wrap either, just renders
 nicely at view time with `glamour`. `hr`'s "view time" is nvim.
 
-
 ## Refresh resolution
 
 `hr sync` is idempotent and **never overwrites user-mutable state.**
 
-| What | Created by | Modified by | Sync behavior on re-run |
-|---|---|---|---|
-| `hr.toml`            | `hr init`        | user | untouched |
-| `feeds/.../*.md`     | first `hr sync`  | user (if they choose) | **skipped if exists** |
-| `feeds/.../*.meta.toml` | first `hr sync` | `hr read`/`fav`/`alias`/user | **untouched** after creation |
-| `.hr/cache.json`     | `hr sync`        | `hr sync` | overwritten each run |
-| `.hr/raw/<feed>/<name>.html` | first `hr sync` | — | **skipped if exists** |
-| `.hr/err.txt`        | `hr sync` (on error) | — | appended |
+| What                         | Created by           | Modified by                  | Sync behavior on re-run      |
+| ---------------------------- | -------------------- | ---------------------------- | ---------------------------- |
+| `hr.toml`                    | `hr init`            | user                         | untouched                    |
+| `feeds/.../*.md`             | first `hr sync`      | user (if they choose)        | **skipped if exists**        |
+| `feeds/.../*.meta.toml`      | first `hr sync`      | `hr read`/`fav`/`alias`/user | **untouched** after creation |
+| `.hr/cache.json`             | `hr sync`            | `hr sync`                    | overwritten each run         |
+| `.hr/raw/<feed>/<name>.html` | first `hr sync`      | —                            | **skipped if exists**        |
+| `.hr/err.txt`                | `hr sync` (on error) | —                            | appended                     |
 
 Implications:
 
@@ -115,7 +111,7 @@ Implications:
   (typo fix, retitling), `hr` keeps the original on disk — same GUID
   → same hash → same path → skipped. To force a fresh copy, delete
   the `.md` and `.meta.toml` and run `hr sync`. A future `hr refresh
-  <path>` command would do this targeted.
+<path>` command would do this targeted.
 - **Cross-machine merge conflicts** can only happen on `.meta.toml`
   (everything else is either immutable or gitignored). The files are
   small and line-oriented; most conflicts auto-merge. Real
@@ -123,3 +119,5 @@ Implications:
 
 The bias is **stability over freshness**: existing files are the
 source of truth, sync only adds new ones.
+
+-- impl cache
