@@ -25,6 +25,7 @@ type Options struct {
 	Config    *config.Config
 	FeedName  string // empty = all feeds
 	UserAgent string
+	Force     bool // ignore cache; refetch even if not modified
 }
 
 type FeedResult struct {
@@ -94,11 +95,12 @@ func syncFeed(
 	tag := "feed:" + f.Name
 
 	entry := c.Get(f.Name)
-	res, err := feed.Fetch(ctx, f.URL, feed.Options{
-		UserAgent:    opts.UserAgent,
-		ETag:         entry.ETag,
-		LastModified: entry.LastModified,
-	})
+	fopts := feed.Options{UserAgent: opts.UserAgent}
+	if !opts.Force {
+		fopts.ETag = entry.ETag
+		fopts.LastModified = entry.LastModified
+	}
+	res, err := feed.Fetch(ctx, f.URL, fopts)
 	if err != nil {
 		elog.Write(tag+":fetch", err)
 		fr.Err = err

@@ -15,6 +15,8 @@ import (
 
 	"github.com/Kunde21/markdownfmt/v3"
 	"gopkg.in/yaml.v3"
+
+	"github.com/isg/hr/internal/textfmt"
 )
 
 type Article struct {
@@ -98,32 +100,80 @@ type Frontmatter struct {
 
 // ParseFile reads a written article and returns its frontmatter.
 func ParseFile(path string) (*Frontmatter, error) {
+	fm, _, err := ReadFile(path)
+	return fm, err
+}
+
+// ReadFile reads a written article and returns its parsed frontmatter
+// plus the raw body bytes (everything after the closing --- marker,
+// with leading blank lines trimmed).
+func ReadFile(path string) (*Frontmatter, []byte, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	sep := []byte("---\n")
 	if !bytes.HasPrefix(data, sep) {
-		return nil, fmt.Errorf("no frontmatter in %s", path)
+		return nil, nil, fmt.Errorf("no frontmatter in %s", path)
 	}
-	body, _, ok := bytes.Cut(data[len(sep):], []byte("\n---\n"))
+	fmBody, rest, ok := bytes.Cut(
+		data[len(sep):], []byte("\n---\n"))
 	if !ok {
-		return nil, fmt.Errorf("unterminated frontmatter in %s", path)
+		return nil, nil, fmt.Errorf(
+			"unterminated frontmatter in %s", path)
 	}
 	var fm Frontmatter
-	if err := yaml.Unmarshal(body, &fm); err != nil {
-		return nil, fmt.Errorf("parse frontmatter %s: %w", path, err)
+	if err := yaml.Unmarshal(fmBody, &fm); err != nil {
+		return nil, nil, fmt.Errorf(
+			"parse frontmatter %s: %w", path, err)
 	}
-	return &fm, nil
+	return &fm, bytes.TrimLeft(rest, "\n"), nil
+}
+
+// Fmt re-emits an article with sanitized frontmatter; body preserved.
+// Returns (changed, error). No-op when nothing needed cleaning.
+func Fmt(path string) (bool, error) {
+	fm, body, err := ReadFile(path)
+	if err != nil {
+		return false, err
+	}
+	orig := *fm
+	fm.Title = textfmt.Line(fm.Title)
+	fm.URL = textfmt.Line(fm.URL)
+	fm.Feed = textfmt.Line(fm.Feed)
+	fm.GUID = textfmt.Line(fm.GUID)
+	fm.Published = textfmt.Line(fm.Published)
+	if *fm == orig {
+		return false, nil
+	}
+	return true, writeArticleFile(path, fm, body)
+}
+
+func writeArticleFile(
+	path string, fm *Frontmatter, body []byte,
+) error {
+	fmData, err := yaml.Marshal(fm)
+	if err != nil {
+		return fmt.Errorf("marshal frontmatter: %w", err)
+	}
+	var b bytes.Buffer
+	b.WriteString("---\n")
+	b.Write(fmData)
+	b.WriteString("---\n\n")
+	b.Write(body)
+	if len(body) == 0 || body[len(body)-1] != '\n' {
+		b.WriteByte('\n')
+	}
+	return os.WriteFile(path, b.Bytes(), 0o644)
 }
 
 func render(a *Article) ([]byte, error) {
 	fm := Frontmatter{
-		Title:     a.Title,
-		URL:       a.URL,
+		Title:     textfmt.Line(a.Title),
+		URL:       textfmt.Line(a.URL),
 		Published: a.Published.Format(time.RFC3339),
-		Feed:      a.FeedName,
-		GUID:      a.GUID,
+		Feed:      textfmt.Line(a.FeedName),
+		GUID:      textfmt.Line(a.GUID),
 	}
 	fmData, err := yaml.Marshal(fm)
 	if err != nil {

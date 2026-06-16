@@ -10,7 +10,10 @@ import (
 	"github.com/isg/hr/internal/vault"
 )
 
-var syncFeedFilter string
+var (
+	syncFeedFilter string
+	syncForce      bool
+)
 
 var syncCmd = &cobra.Command{
 	Use:   "sync",
@@ -38,6 +41,7 @@ var syncCmd = &cobra.Command{
 			Config:    cfg,
 			FeedName:  syncFeedFilter,
 			UserAgent: ua,
+			Force:     syncForce,
 		})
 		if res != nil {
 			printSyncSummary(res)
@@ -63,5 +67,7 @@ func printSyncSummary(r *syncer.Result) {
 func init() {
 	syncCmd.Flags().StringVar(&syncFeedFilter, "feed", "",
 		"sync only this feed name")
+	syncCmd.Flags().BoolVar(&syncForce, "force", false,
+		"ignore cache and refetch even if not modified")
 	rootCmd.AddCommand(syncCmd)
 }

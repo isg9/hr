@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
+
+	"github.com/isg/hr/internal/textfmt"
 )
 
 type Meta struct {
@@ -116,6 +118,24 @@ func MarkUnread(articlePath string) error {
 	return Save(articlePath, m)
 }
 
+// Fmt re-sanitizes the alias on a sidecar and rewrites if changed.
+// Missing sidecars are no-ops. Returns (changed, error).
+func Fmt(articlePath string) (bool, error) {
+	m, err := Load(articlePath)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return false, nil
+		}
+		return false, err
+	}
+	orig := m.Alias
+	m.Alias = textfmt.Line(m.Alias)
+	if m.Alias == orig {
+		return false, nil
+	}
+	return true, Save(articlePath, m)
+}
+
 // SetAlias sets the display alias on an article (or clears it if alias
 // is empty/whitespace).
 func SetAlias(articlePath, alias string) error {
@@ -126,7 +146,7 @@ func SetAlias(articlePath, alias string) error {
 	if err != nil {
 		return err
 	}
-	m.Alias = strings.TrimSpace(alias)
+	m.Alias = textfmt.Line(alias)
 	return Save(articlePath, m)
 }
 

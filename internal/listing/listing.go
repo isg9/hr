@@ -14,6 +14,7 @@ import (
 
 	"github.com/isg/hr/internal/article"
 	"github.com/isg/hr/internal/meta"
+	"github.com/isg/hr/internal/textfmt"
 	"github.com/isg/hr/internal/vault"
 )
 
@@ -86,11 +87,11 @@ func loadItem(path string) (Item, error) {
 	pub, _ := time.Parse(time.RFC3339, fm.Published)
 	return Item{
 		Path:      path,
-		Title:     fm.Title,
-		Alias:     m.Alias,
-		URL:       fm.URL,
-		Feed:      fm.Feed,
-		GUID:      fm.GUID,
+		Title:     textfmt.Line(fm.Title),
+		Alias:     textfmt.Line(m.Alias),
+		URL:       textfmt.Line(fm.URL),
+		Feed:      textfmt.Line(fm.Feed),
+		GUID:      textfmt.Line(fm.GUID),
 		Published: pub,
 		Read:      m.Read,
 		Favorite:  m.Favorite,
