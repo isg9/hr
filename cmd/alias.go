@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/isg/hr/internal/meta"
+	"github.com/isg9/hr/internal/meta"
 )
 
 var aliasCmd = &cobra.Command{

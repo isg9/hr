@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/isg/hr/internal/config"
-	"github.com/isg/hr/internal/vault"
+	"github.com/isg9/hr/internal/config"
+	"github.com/isg9/hr/internal/vault"
 )
 
 func openActiveVault() (*vault.Vault, *config.Config, error) {

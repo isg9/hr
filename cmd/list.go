@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/isg/hr/internal/listing"
+	"github.com/isg9/hr/internal/listing"
 )
 
 var (

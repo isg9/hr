@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/isg/hr/internal/rc"
+	"github.com/isg9/hr/internal/rc"
 )
 
 //go:embed default.toml

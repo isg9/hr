@@ -5,9 +5,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/isg/hr/internal/config"
-	"github.com/isg/hr/internal/syncer"
-	"github.com/isg/hr/internal/vault"
+	"github.com/isg9/hr/internal/config"
+	"github.com/isg9/hr/internal/syncer"
+	"github.com/isg9/hr/internal/vault"
 )
 
 var (

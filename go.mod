@@ -1,4 +1,4 @@
-module github.com/isg/hr
+module github.com/isg9/hr
 
 go 1.25.5
 

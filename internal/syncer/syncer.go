@@ -11,13 +11,13 @@ import (
 	md "github.com/JohannesKaufmann/html-to-markdown"
 	"github.com/mmcdole/gofeed"
 
-	"github.com/isg/hr/internal/article"
-	"github.com/isg/hr/internal/cache"
-	"github.com/isg/hr/internal/config"
-	"github.com/isg/hr/internal/errlog"
-	"github.com/isg/hr/internal/feed"
-	"github.com/isg/hr/internal/meta"
-	"github.com/isg/hr/internal/vault"
+	"github.com/isg9/hr/internal/article"
+	"github.com/isg9/hr/internal/cache"
+	"github.com/isg9/hr/internal/config"
+	"github.com/isg9/hr/internal/errlog"
+	"github.com/isg9/hr/internal/feed"
+	"github.com/isg9/hr/internal/meta"
+	"github.com/isg9/hr/internal/vault"
 )
 
 type Options struct {
