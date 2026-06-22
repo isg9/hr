@@ -3,6 +3,7 @@
 package listing
 
 import (
+	"encoding/json"
 	"fmt"
 	"slices"
 	"sort"
@@ -17,16 +18,35 @@ import (
 )
 
 type Item struct {
-	Path      string    `json:"path"`
-	Title     string    `json:"title"`
-	Alias     string    `json:"alias,omitempty"`
-	URL       string    `json:"url"`
-	Feed      string    `json:"feed"`
-	GUID      string    `json:"guid,omitempty"`
-	Published time.Time `json:"published"`
-	Read      bool      `json:"read"`
-	Favorite  bool      `json:"favorite"`
-	Tags      []string  `json:"tags,omitempty"`
+	Path      string   `json:"path"`
+	Title     string   `json:"title"`
+	Alias     string   `json:"alias,omitempty"`
+	URL       string   `json:"url"`
+	Feed      string   `json:"feed"`
+	GUID      string   `json:"guid,omitempty"`
+	Published PubTime  `json:"published"`
+	Read      bool     `json:"read"`
+	Favorite  bool     `json:"favorite"`
+	Tags      []string `json:"tags,omitempty"`
+}
+
+// PubTime wraps time.Time so it JSON-serializes via an RFC3339 string
+// that tolerates BC (negative) years. time.Time's own MarshalJSON errors
+// for any year outside [0,9999], which would otherwise break `hr list
+// --json` and the listing cache for BC-dated articles.
+type PubTime struct{ time.Time }
+
+func (t PubTime) MarshalJSON() ([]byte, error) {
+	return json.Marshal(t.Format(time.RFC3339))
+}
+
+func (t *PubTime) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+	t.Time = parsePublished(s)
+	return nil
 }
 
 // Label returns the alias if set, otherwise the article title.
@@ -59,7 +79,7 @@ func List(v *vault.Vault, f Filter) ([]Item, error) {
 	}
 
 	sort.Slice(items, func(i, j int) bool {
-		return items[i].Published.After(items[j].Published)
+		return items[i].Published.After(items[j].Published.Time)
 	})
 	return items, nil
 }
@@ -78,7 +98,7 @@ func loadItem(path string) (Item, error) {
 		URL:       textfmt.Line(fm.URL),
 		Feed:      textfmt.Line(fm.Feed),
 		GUID:      textfmt.Line(fm.GUID),
-		Published: pub,
+		Published: PubTime{pub},
 		Read:      m.Read,
 		Favorite:  m.Favorite,
 		Tags:      m.Tags,
