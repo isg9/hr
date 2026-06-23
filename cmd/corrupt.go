@@ -13,11 +13,12 @@ import (
 )
 
 var (
-	corruptRange string
-	corruptNote  string
-	corruptID    string
-	corruptAll   bool
-	corruptJSON  bool
+	corruptRange   string
+	corruptNote    string
+	corruptContext int
+	corruptID      string
+	corruptAll     bool
+	corruptJSON    bool
 )
 
 var corruptCmd = &cobra.Command{
@@ -40,7 +41,7 @@ See 'hr corrupt list --all --json' for the unified report, and
 		if err != nil {
 			return err
 		}
-		c, err := corrupt.Mark(args[0], r, corruptNote)
+		c, err := corrupt.Mark(args[0], r, corruptNote, corruptContext)
 		if err != nil {
 			return err
 		}
@@ -166,6 +167,9 @@ func init() {
 		"selection as L1:C1-L2:C2 (1-based lines, 0-based cols, end exclusive)")
 	corruptCmd.Flags().StringVar(&corruptNote, "note", "",
 		"optional reason / description")
+	corruptCmd.Flags().IntVar(&corruptContext, "context-lines",
+		corrupt.DefaultContextLines,
+		"lines of surrounding context to capture on each side")
 	_ = corruptCmd.MarkFlagRequired("range")
 
 	corruptListCmd.Flags().BoolVar(&corruptAll, "all", false,

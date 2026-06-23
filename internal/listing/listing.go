@@ -28,6 +28,7 @@ type Item struct {
 	Read      bool     `json:"read"`
 	Favorite  bool     `json:"favorite"`
 	Tags      []string `json:"tags,omitempty"`
+	Corrupt   int      `json:"corrupt,omitempty"` // count of corruption marks
 }
 
 // PubTime wraps time.Time so it JSON-serializes via an RFC3339 string
@@ -58,10 +59,11 @@ func (it Item) Label() string {
 }
 
 type Filter struct {
-	Feed   string
-	Tag    string
-	Unread bool
-	Since  time.Duration
+	Feed      string
+	Tag       string
+	Unread    bool
+	Corrupted bool
+	Since     time.Duration
 }
 
 func List(v *vault.Vault, f Filter) ([]Item, error) {
@@ -102,6 +104,7 @@ func loadItem(path string) (Item, error) {
 		Read:      m.Read,
 		Favorite:  m.Favorite,
 		Tags:      m.Tags,
+		Corrupt:   len(m.Corruptions),
 	}, nil
 }
 
@@ -133,6 +136,9 @@ func (f Filter) match(it Item, now time.Time) bool {
 		return false
 	}
 	if f.Unread && it.Read {
+		return false
+	}
+	if f.Corrupted && it.Corrupt == 0 {
 		return false
 	}
 	if f.Since > 0 && it.Published.Before(now.Add(-f.Since)) {

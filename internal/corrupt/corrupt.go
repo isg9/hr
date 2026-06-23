@@ -20,9 +20,9 @@ import (
 	"github.com/isdg/hr/internal/vault"
 )
 
-// contextLines is how many lines of surrounding text are captured on
-// each side of a marked region.
-const contextLines = 2
+// DefaultContextLines is how many lines of surrounding text are captured
+// on each side of a marked region when the caller doesn't specify.
+const DefaultContextLines = 2
 
 // Range is a selection within an article: 1-based lines, 0-based byte
 // columns, with EndCol exclusive.
@@ -42,8 +42,12 @@ type Record struct {
 
 // Mark extracts the text at r from the article and records a corruption
 // on its sidecar, returning the stored entry. Re-marking the identical
-// region updates the existing entry rather than duplicating it.
-func Mark(articlePath string, r Range, note string) (meta.Corruption, error) {
+// region updates the existing entry rather than duplicating it. ctxLines
+// surrounding lines are captured on each side (negative means default).
+func Mark(articlePath string, r Range, note string, ctxLines int) (meta.Corruption, error) {
+	if ctxLines < 0 {
+		ctxLines = DefaultContextLines
+	}
 	data, err := os.ReadFile(articlePath)
 	if err != nil {
 		return meta.Corruption{}, err
@@ -61,7 +65,7 @@ func Mark(articlePath string, r Range, note string) (meta.Corruption, error) {
 		EndLine:   r.EndLine,
 		EndCol:    r.EndCol,
 		Quote:     quote,
-		Context:   context(lines, r),
+		Context:   context(lines, r, ctxLines),
 		Note:      textfmt.Line(note),
 		CreatedAt: time.Now().UTC(),
 	}
@@ -149,9 +153,9 @@ func extract(lines []string, r Range) string {
 	return strings.ToValidUTF8(quote, "")
 }
 
-func context(lines []string, r Range) string {
-	start := max(1, r.StartLine-contextLines)
-	end := min(len(lines), r.EndLine+contextLines)
+func context(lines []string, r Range, ctxLines int) string {
+	start := max(1, r.StartLine-ctxLines)
+	end := min(len(lines), r.EndLine+ctxLines)
 	return strings.Join(lines[start-1:end], "\n")
 }
 

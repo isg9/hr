@@ -12,12 +12,13 @@ import (
 )
 
 var (
-	listUnread bool
-	listFeed   string
-	listTag    string
-	listSince  string
-	listTSV    bool
-	listJSON   bool
+	listUnread    bool
+	listFeed      string
+	listTag       string
+	listSince     string
+	listCorrupted bool
+	listTSV       bool
+	listJSON      bool
 )
 
 var listCmd = &cobra.Command{
@@ -65,9 +66,10 @@ var feedCmd = &cobra.Command{
 
 func buildListFilter() (listing.Filter, error) {
 	f := listing.Filter{
-		Feed:   listFeed,
-		Tag:    listTag,
-		Unread: listUnread,
+		Feed:      listFeed,
+		Tag:       listTag,
+		Unread:    listUnread,
+		Corrupted: listCorrupted,
 	}
 	if listSince != "" {
 		d, err := listing.ParseSince(listSince)
@@ -131,9 +133,10 @@ func printPretty(items []listing.Item) error {
 		if len(feed) > feedW {
 			feed = feed[:feedW]
 		}
-		fmt.Printf("[%s%s] %s  %-*s  %s\n",
+		fmt.Printf("[%s%s%s] %s  %-*s  %s\n",
 			stateChar(it.Read, "R"),
 			stateChar(it.Favorite, "F"),
+			stateChar(it.Corrupt > 0, "C"),
 			it.Published.Format("2006-01-02"),
 			feedW, feed,
 			it.Label(),
@@ -158,6 +161,8 @@ func init() {
 		"filter by tag")
 	listCmd.Flags().StringVar(&listSince, "since", "",
 		"only items newer than (e.g. 7d, 24h)")
+	listCmd.Flags().BoolVar(&listCorrupted, "corrupted", false,
+		"only items with corruption marks")
 	listCmd.Flags().BoolVar(&listTSV, "tsv", false,
 		"tab-separated output (machine-friendly)")
 	listCmd.Flags().BoolVar(&listJSON, "json", false,

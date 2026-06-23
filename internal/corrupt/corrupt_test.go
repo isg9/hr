@@ -65,7 +65,7 @@ func TestMarkRoundTrip(t *testing.T) {
 	if err := os.WriteFile(path, []byte("---\nx\n---\n\n"+emLine+"\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	c, err := Mark(path, Range{5, 0, 5, 12}, "garble")
+	c, err := Mark(path, Range{5, 0, 5, 12}, "garble", DefaultContextLines)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -73,7 +73,7 @@ func TestMarkRoundTrip(t *testing.T) {
 		t.Fatalf("invalid UTF-8 quote: %q", c.Quote)
 	}
 	// Re-mark identical region: upsert, not duplicate.
-	if _, err := Mark(path, Range{5, 0, 5, 12}, "again"); err != nil {
+	if _, err := Mark(path, Range{5, 0, 5, 12}, "again", DefaultContextLines); err != nil {
 		t.Fatal(err)
 	}
 	m := meta.LoadOrDefault(path)
