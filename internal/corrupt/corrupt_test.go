@@ -104,3 +104,41 @@ func TestMarkRoundTrip(t *testing.T) {
 		t.Fatalf("id changed: %q vs %q", m.Corruptions[0].ID, c.ID)
 	}
 }
+
+func TestUndo(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "a.md")
+	if err := os.WriteFile(path,
+		[]byte("---\nx\n---\n\nThe quick brwn fox.\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	first, err := Mark(path, Range{5, 0, 5, 3}, MarkOptions{ContextLines: -1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	last, err := Mark(path, Range{5, 10, 5, 14}, MarkOptions{ContextLines: -1})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Undo removes the most recent mark, leaving the first.
+	got, ok, err := Undo(path)
+	if err != nil || !ok {
+		t.Fatalf("undo: ok=%v err=%v", ok, err)
+	}
+	if got.ID != last.ID {
+		t.Fatalf("undo removed %q, want most recent %q", got.ID, last.ID)
+	}
+	m := meta.LoadOrDefault(path)
+	if len(m.Corruptions) != 1 || m.Corruptions[0].ID != first.ID {
+		t.Fatalf("after undo want only %q, got %+v", first.ID, m.Corruptions)
+	}
+
+	// Undo the remaining mark, then undo on empty reports nothing.
+	if _, ok, _ := Undo(path); !ok {
+		t.Fatal("undo of remaining mark should succeed")
+	}
+	if _, ok, _ := Undo(path); ok {
+		t.Fatal("undo with no marks should report ok=false")
+	}
+}
