@@ -170,7 +170,10 @@ func writeRawHTML(
 		return nil
 	}
 	rawPath := v.RawPath(a.FeedName, a.Filename())
-	if _, err := os.Stat(rawPath); err == nil {
+	// Dedup by the stable id (like article.Write), so an edited+renamed
+	// article isn't re-stashed under its original name on the next sync.
+	if hits, _ := filepath.Glob(
+		filepath.Join(filepath.Dir(rawPath), "*-"+a.ID()+".html")); len(hits) > 0 {
 		return nil
 	}
 	if err := os.MkdirAll(filepath.Dir(rawPath), 0o755); err != nil {

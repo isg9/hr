@@ -110,10 +110,14 @@ func Write(feedsDir string, a *Article) (bool, string, error) {
 	if err := os.MkdirAll(feedDir, 0o755); err != nil {
 		return false, "", err
 	}
-	path := filepath.Join(feedDir, a.Filename())
-	if _, err := os.Stat(path); err == nil {
-		return false, path, nil
+	// Dedup by the stable id, not the full filename: an article whose
+	// title or date was edited (and file renamed) must not be re-fetched
+	// on the next sync, since the feed still yields its original name.
+	if hits, _ := filepath.Glob(
+		filepath.Join(feedDir, "*-"+a.ID()+".md")); len(hits) > 0 {
+		return false, hits[0], nil
 	}
+	path := filepath.Join(feedDir, a.Filename())
 
 	content, err := render(a)
 	if err != nil {
